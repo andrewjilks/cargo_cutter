@@ -1,0 +1,33 @@
+-- Version 1.0.1 official release:
+	The first content addition to the build
+
+Added more advanced file handling and versioning
+Markdown added to source
+Modularized menu code for ease of debugging and feature addition
+
+-- Version 1.0.2 official release:
+	git integration
+
+Yea thats it
+
+-- Version 1.0.3 official release:
+	backtracing and verbose logging
+
+Log generation for easier debugging
+backtracing to better understand fab'd modules
+
+-- Version 1.0.4 official release:
+	configs + distro setup
+
+I want to use this tool on another device
+
+-- Version 1.0.5 python integration:
+	hell yea
+
+make python files
+execute scripts
+repl
+
+
+
+
