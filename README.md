@@ -52,7 +52,7 @@ rust_dev_terminal/
 - [ ] Fix python paste crashiing bug
 - [ ] Shortcuts/true CLI
 - [ ] Text file clean up
-- [ ] Dev docs reworking
+- [ ] Dev docs rework
 - [ ] Framework for text-config integration
 - [ ] Create a simple GUI (optional)
 
