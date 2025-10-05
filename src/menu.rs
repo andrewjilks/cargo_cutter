@@ -8,8 +8,10 @@ use crate::build_system::BuildSystem;
 use crate::self_update::SelfUpdater;
 use crate::git_manager::GitManager;
 use crate::ansi_theme::AnsiTheme;
+pub use editor::open_file_in_editor;
 
 // Import the new menu modules
+mod editor;
 mod menu_build_run;
 mod menu_project_creator;
 mod menu_file_management;
@@ -65,6 +67,7 @@ pub fn main_menu_with_config(config: crate::config::AppConfig) {
         AnsiTheme::print_themed("11) Open Build Log File\n", &config.theme);
         AnsiTheme::print_themed("12) Python Management\n", &config.theme);
         AnsiTheme::print_themed("13) Configuration Settings\n", &config.theme);
+        AnsiTheme::print_themed("14) Open File in Text Editor\n", &config.theme);
         AnsiTheme::print_themed("Q) Quit\n", &config.theme);
 
         AnsiTheme::print_themed("Enter choice: ", &config.theme);
@@ -127,6 +130,19 @@ pub fn main_menu_with_config(config: crate::config::AppConfig) {
             "12" => python_management_menu(&python_manager, &current_project, &config.theme),
             "13" => {
                 config_menu(&config_manager, &config.theme);
+            }
+            "14" => {
+                if let Some(project) = &current_project {
+                    let file_manager = FileManager::new_with_config(config.clone());
+                    if let Ok(Some(file_path)) = file_manager.select_file_from_list(project) {
+                        let full_path = config.get_src_path(project).join(file_path);
+                        if let Err(e) = editor::open_file_in_editor(full_path, config.theme.clone()) {
+                            AnsiTheme::print_error(&format!("Editor error: {}\n", e), &config.theme);
+                        }
+                    }
+                } else {
+                    AnsiTheme::print_error(" No project selected.\n", &config.theme);
+                }
             }
             "Q" | "q" => {
                 AnsiTheme::print_themed("Goodbye!\n", &config.theme);
