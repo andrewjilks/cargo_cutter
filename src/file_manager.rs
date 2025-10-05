@@ -33,6 +33,83 @@ impl FileManager {
         FileManager { config }
     }
 
+    fn walk_project_dir(dir: &Path, files: &mut Vec<PathBuf>) -> Result<(), String> {
+        if dir.is_dir() {
+            for entry in fs::read_dir(dir).map_err(|e| e.to_string())? {
+                let entry = entry.map_err(|e| e.to_string())?;
+                let path = entry.path();
+            
+                // Skip target directory and other build artifacts
+                if path.is_dir() {
+                    if path.file_name().map(|name| name == "target").unwrap_or(false) {
+                        continue;
+                    }
+                    Self::walk_project_dir(&path, files)?;
+                } else {
+                    // Include multiple file extensions
+                    if let Some(ext) = path.extension() {
+                        let ext_str = ext.to_string_lossy().to_lowercase();
+                        if ext_str == "rs" || ext_str == "txt" || ext_str == "py" || ext_str == "toml" || 
+                           ext_str == "md" || ext_str == "json" || ext_str == "yml" || ext_str == "yaml" {
+                            files.push(path);
+                        }
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    pub fn select_editor_file_from_list(&self, project_name: &str) -> Result<Option<String>, String> {
+        let files = self.list_editor_files(project_name)?;
+    
+        if files.is_empty() {
+            AnsiTheme::print_warning(" No supported files found in project.\n", &self.config.theme);
+            return Ok(None);
+        }
+ 
+        AnsiTheme::print_themed("\n", &self.config.theme);
+        AnsiTheme::print_blue("Files in project:\n", &self.config.theme);
+        for (i, path) in &files {
+            let relative_path = path.strip_prefix(self.config.get_project_path(project_name))
+                .unwrap_or(path)
+                .display();
+            AnsiTheme::print_themed(&format!("{:2}) {}\n", i, relative_path), &self.config.theme);
+        }
+
+        AnsiTheme::print_themed(" 0) Cancel\n", &self.config.theme);
+    
+        let selection = Self::get_number_input("Select file by number: ", 0, files.len(), &self.config.theme);
+    
+        match selection {
+            Some(0) => {
+                AnsiTheme::print_themed("Selection cancelled.\n", &self.config.theme);
+                Ok(None)
+            }
+            Some(index) if index <= files.len() => {
+                let selected_path = files[index - 1].1.clone();
+                let relative_path = selected_path.strip_prefix(self.config.get_project_path(project_name))
+                    .unwrap_or(&selected_path)
+                    .to_string_lossy()
+                    .to_string();
+                Ok(Some(relative_path))
+            }
+            _ => {
+                AnsiTheme::print_themed("Invalid selection.\n", &self.config.theme);
+                Ok(None)
+            }
+        }
+    }
+
+    pub fn list_editor_files(&self, project_name: &str) -> Result<Vec<(usize, PathBuf)>, String> {
+        let project_path = self.config.get_project_path(project_name);
+        let mut files = Vec::new();
+        Self::walk_project_dir(&project_path, &mut files)?;
+    
+        let numbered_files = files.into_iter().enumerate().map(|(i, path)| (i + 1, path)).collect();
+        Ok(numbered_files)
+    }
+
     pub fn new() -> Self {
         let config_manager = crate::config::ConfigManager::new();
         FileManager { 

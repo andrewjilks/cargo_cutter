@@ -132,18 +132,18 @@ pub fn main_menu_with_config(config: crate::config::AppConfig) {
                 config_menu(&config_manager, &config.theme);
             }
             "14" => {
-                if let Some(project) = &current_project {
-                    let file_manager = FileManager::new_with_config(config.clone());
-                    if let Ok(Some(file_path)) = file_manager.select_file_from_list(project) {
-                        let full_path = config.get_src_path(project).join(file_path);
-                        if let Err(e) = editor::open_file_in_editor(full_path, config.theme.clone()) {
-                            AnsiTheme::print_error(&format!("Editor error: {}\n", e), &config.theme);
-                        }
-                    }
-                } else {
-                    AnsiTheme::print_error(" No project selected.\n", &config.theme);
-                }
-            }
+	        if let Some(project) = &current_project {
+    	            let file_manager = FileManager::new_with_config(config.clone());
+	            if let Ok(Some(file_path)) = file_manager.select_editor_file_from_list(project) {
+	                let full_path = config.get_project_path(project).join(file_path);
+	                if let Err(e) = editor::open_file_in_editor(full_path, config.theme.clone()) {
+	                    AnsiTheme::print_error(&format!("Editor error: {}\n", e), &config.theme);
+	                }
+ 	            }
+	        } else {
+	            AnsiTheme::print_error(" No project selected.\n", &config.theme);
+	        }
+	    }
             "Q" | "q" => {
                 AnsiTheme::print_themed("Goodbye!\n", &config.theme);
                 break;

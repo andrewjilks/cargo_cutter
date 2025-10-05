@@ -63,7 +63,3 @@ This project is licensed under the MIT License.
 ## 🏗 Contributors
 
 **Andrew Jilks** - Creator & Developer
-
----
-
-*Last successful build: 2025-10-03 21:05:00*
